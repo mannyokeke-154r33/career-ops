@@ -12,7 +12,8 @@
 - Candidate identifies Chicago, Illinois as their permanent home and expects to return to Chicago soon. Current physical presence outside Chicago is temporary; the exact return date is not yet confirmed.
 - Prioritize Chicago on-site/hybrid opportunities and US remote jobs compatible with a Chicago-based employee. Do not reject an otherwise suitable Chicago job solely because the candidate has not yet returned.
 - Do not state that the candidate is already physically in Chicago or available to start on-site immediately. Flag start dates requiring confirmation.
-- US work authorization and sponsorship needs remain unverified. Never infer them from permanent home or residence. Hold applications requiring those answers for confirmation.
+- Candidate confirms they are a US citizen by birth and are authorized to work in the United States without employer visa sponsorship. Apply this to eligibility filtering, but never publish citizenship details or answer unrelated self-identification questions without review.
+- Candidate's exact Chicago return date remains unverified. Confirm availability before asserting an immediate on-site start date.
 
 ## Education and job families
 - Candidate-reported education: bachelor's degree in Healthcare Administration and master's degree in Information Technology specializing in Software Engineering.
