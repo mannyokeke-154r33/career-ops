@@ -31,7 +31,7 @@ Mark `message_status sent` only after actually sending the message. You may also
 ## Test commands
 
 ```sh
-node --test tests/jobflow30-shortlist.test.mjs tests/jobflow15-outreach.test.mjs tests/jobflow15-message.test.mjs tests/jobflow15-pipeline.test.mjs tests/jobflow15-enrich.test.mjs
+node --test tests/jobflow30-shortlist.test.mjs tests/jobflow15-outreach.test.mjs tests/jobflow15-message.test.mjs tests/jobflow15-pipeline.test.mjs tests/jobflow15-enrich.test.mjs tests/jobflow15-recruiter-research.test.mjs
 ```
 
 The shortlist uses heuristic keyword and candidate-reported evidence matching, not verified hiring-manager ownership or an employer ATS score. A Pending-pipeline adapter is implemented, but scanner output does not include full descriptions and no end-to-end run has been verified. No LinkedIn recruiter lookup API, automatic application submission, or scheduled follow-up has been implemented yet.
