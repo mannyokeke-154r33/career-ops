@@ -4,8 +4,8 @@ This feature targets **up to 15 reviewed applications per day**. No application 
 
 ## Daily process
 
-1. Run the existing Career Ops scanner and export job listings to a JSON array containing `title`, `company`, `url`, `location`, and optionally `description`.
-2. Run `node scripts/jobflow30-shortlist.mjs jobs.json data/jobflow15-queue.json`. The legacy filename is retained for compatibility, but the default limit is 15.
+1. Run the existing Career Ops scanner: `node scan.mjs`. It writes new offers to `data/pipeline.md` in its Pending section.
+2. Run `node scripts/jobflow30-shortlist.mjs --pipeline data/pipeline.md data/jobflow15-queue.json`. The legacy filename is retained for compatibility, but the default limit is 15. Alternatively provide a JSON array of jobs as the first argument. Scanner pipeline rows do not include full job descriptions, so verify qualifications manually before relying on evidence matches.
 3. Verify the original posting, eligibility, relevant experience, and actual application requirements. Review the tailored resume and submit the application manually.
 4. For each role, identify a recruiter or hiring manager using public professional information. Record whether their connection to the requisition is confirmed, possible, or unverified. Avoid assuming a contact owns a requisition based only on their title.
 5. Look for a genuine role-related public interaction opportunity. Do not mass-like, comment, or connect automatically.
@@ -31,7 +31,7 @@ Mark `message_status sent` only after actually sending the message. You may also
 ## Test commands
 
 ```sh
-node --test tests/jobflow30-shortlist.test.mjs tests/jobflow15-outreach.test.mjs
+node --test tests/jobflow30-shortlist.test.mjs tests/jobflow15-outreach.test.mjs tests/jobflow15-message.test.mjs tests/jobflow15-pipeline.test.mjs
 ```
 
-The shortlist uses heuristic keyword and candidate-reported evidence matching, not verified hiring-manager ownership or an employer ATS score. No LinkedIn profile lookup API, job-scanner integration, automatic application submission, or scheduled follow-up has been implemented yet.
+The shortlist uses heuristic keyword and candidate-reported evidence matching, not verified hiring-manager ownership or an employer ATS score. A Pending-pipeline adapter is implemented, but scanner output does not include full descriptions and no end-to-end run has been verified. No LinkedIn recruiter lookup API, automatic application submission, or scheduled follow-up has been implemented yet.
