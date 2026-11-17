@@ -30,3 +30,12 @@
 - Track discovered, shortlisted, preparing, ready for review, applied, interviewing, rejected, offer, and withdrawn separately.
 - Keep resumes, contact details, application answers, emails, tokens, and tracker records out of this public repository. Store user data in a local private data root.
 - Write in concise professional English, with no em dashes or ellipses.
+
+## LinkedIn-assisted matching and evidence
+- Candidate LinkedIn profile: https://www.linkedin.com/in/emmanuel-g-c-emmanuelokeke-m-s-b1424825b
+- Use LinkedIn's Experience, Education, Skills, and Projects sections as a cross-check against the user-approved CV and GitHub evidence, not as independently verified employment history.
+- Require user-supplied LinkedIn export or confirmed profile text for comprehensive analysis; a public profile URL alone is insufficient evidence of dates, duties, skills, and achievements.
+- Record discrepancies in employer names, titles, dates, degree names, and skills for candidate review. Never silently resolve a discrepancy by inventing a fact.
+- Mark each matching signal as supported by CV, supported by LinkedIn, supported by GitHub, or unverified. Treat LinkedIn-only assertions as self-reported until corroborated.
+- Do not scrape LinkedIn behind authentication, bypass access controls, or automatically publish profile exports or personal history to this public repository.
+- The repository's linkedin-import.mjs imports LinkedIn *job alerts*, not candidate profile history. Do not treat it as a profile verifier.
