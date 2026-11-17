@@ -3,6 +3,7 @@
 // Usage: node scripts/jobflow15-enrich.mjs data/jobflow15-queue.json data/jobflow15-enriched.json
 import { readFileSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
+import { evaluate } from './jobflow30-shortlist.mjs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, resolve, join } from 'node:path';
 
@@ -22,7 +23,7 @@ export function enrichOne(job, run = spawnSync) {
 }
 export function enrichQueue(queue, run = spawnSync) {
   if (!queue || !Array.isArray(queue.shortlisted)) throw new TypeError('Expected shortlist output with shortlisted array');
-  return { ...queue, shortlisted:queue.shortlisted.map(job=>enrichOne(job,run)), note:'Read-only job description extraction. Verify postings and requirements manually. No application or LinkedIn action performed.' };
+  return { ...queue, shortlisted:queue.shortlisted.map(job=>{ const enriched=enrichOne(job,run); return { ...evaluate(enriched), jd_status:enriched.jd_status, jd_verified:enriched.jd_verified, ...(enriched.jd_extracted_at ? {jd_extracted_at:enriched.jd_extracted_at} : {}) }; }).sort((a,b)=>b.score-a.score), note:'Read-only job description extraction. Verify postings and requirements manually. No application or LinkedIn action performed.' };
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   const [,,input,output] = process.argv;
