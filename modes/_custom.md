@@ -9,7 +9,10 @@
 - Search US-wide remote roles and on-site or hybrid roles physically located in Chicago, Illinois.
 - Exclude Chicago suburbs by default.
 - A US-remote label does not prove international remote eligibility. Flag US residency, state restrictions, timezone, payroll, and work-authorization requirements.
-- Candidate's current residence, relocation date, US work authorization, and sponsorship needs are unverified. Never assume them. Hold applications requiring those answers for confirmation.
+- Candidate identifies Chicago, Illinois as their permanent home and expects to return to Chicago soon. Current physical presence outside Chicago is temporary; the exact return date is not yet confirmed.
+- Prioritize Chicago on-site/hybrid opportunities and US remote jobs compatible with a Chicago-based employee. Do not reject an otherwise suitable Chicago job solely because the candidate has not yet returned.
+- Do not state that the candidate is already physically in Chicago or available to start on-site immediately. Flag start dates requiring confirmation.
+- US work authorization and sponsorship needs remain unverified. Never infer them from permanent home or residence. Hold applications requiring those answers for confirmation.
 
 ## Education and job families
 - Candidate-reported education: bachelor's degree in Healthcare Administration and master's degree in Information Technology specializing in Software Engineering.
