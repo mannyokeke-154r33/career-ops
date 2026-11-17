@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// JobFlow 30 shortlist: conservative review queue from an existing JSON export.
+// JobFlow 15 shortlist: conservative review queue from an existing JSON export.
 // Usage: node scripts/jobflow30-shortlist.mjs input.json [output.json]
 import { readFileSync, writeFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
@@ -37,9 +37,9 @@ export function evaluate(job) {
   const status = reasons.length ? 'needs_review' : 'shortlisted';
   const evidence = matchEvidence(job);
   const evidenceScore = Math.min(25, evidence.evidence_coverage_count * 3);
-  return { ...job, score: Math.min(100, Math.round(score * 0.75 + evidenceScore)), status, reasons, ...evidence };
+  return { ...job, score: Math.min(100, Math.round(score * 0.75 + evidenceScore)), status, reasons, outreach: { recruiter_lookup: 'not_started', recruiter_profile_url: null, recruiter_role_confirmed: false, interaction_opportunity: null, application_confirmed: false, message_status: 'not_drafted', message_sent_at: null, reply_status: 'none', follow_up_due: null }, ...evidence };
 }
-export function shortlist(jobs, limit = 30) {
+export function shortlist(jobs, limit = 15) {
   if (!Array.isArray(jobs)) throw new TypeError('Expected JSON array of jobs');
   const seen = new Set();
   const evaluated = jobs.map(evaluate).filter(job => {
@@ -48,7 +48,7 @@ export function shortlist(jobs, limit = 30) {
     seen.add(key);
     return true;
   }).sort((a, b) => (a.status === 'shortlisted' ? 0 : 1) - (b.status === 'shortlisted' ? 0 : 1) || b.score - a.score);
-  return { generated_at: new Date().toISOString(), target: limit, shortlisted: evaluated.filter(j => j.status === 'shortlisted').slice(0, limit), needs_review: evaluated.filter(j => j.status === 'needs_review'), note: 'Shortlist only. No application submitted. Confirm work location, job requirements and posting liveness before applying.' };
+  return { generated_at: new Date().toISOString(), target: limit, shortlisted: evaluated.filter(j => j.status === 'shortlisted').slice(0, limit), needs_review: evaluated.filter(j => j.status === 'needs_review'), note: 'Shortlist only. Target up to 15 confirmed applications daily. Verify the job and eligibility, research relevant LinkedIn contacts, and send individualized outreach only after user review and confirmed application. No application or message was sent.' };
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const [, , input, output] = process.argv;
