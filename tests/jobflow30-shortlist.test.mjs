@@ -9,3 +9,14 @@ test('allows clearly US-wide remote roles', () => assert.equal(evaluate(job({ lo
 test('deduplicates by requisition id', () => assert.equal(shortlist([job(), job({url:'https://example.org/jobs/2'})]).shortlisted.length, 2));
 test('caps daily queue at 30', () => assert.equal(shortlist(Array.from({length:35},(_,i)=>job({url:'https://example.org/jobs/'+i}))).shortlisted.length,30));
 test('does not pass senior roles', () => assert.equal(evaluate(job({title:'Senior Healthcare IT Analyst'})).status,'needs_review'));
+
+test('explains SQL and EHR evidence from job requirements', () => {
+  const result = evaluate(job({ description: 'Requires SQL, Epic EHR and Python' }));
+  assert.ok(result.evidence_matches.some(x => x.id === 'pharmacy' && x.matched_terms.includes('epic')));
+  assert.ok(result.evidence_matches.some(x => x.id === 'hackerrank-sql'));
+  assert.ok(result.evidence_matches.some(x => x.id === 'techhub'));
+});
+test('does not invent evidence for an unrelated skill', () => {
+  const result = evaluate(job({ description: 'Requires Kubernetes', title:'Healthcare IT Analyst' }));
+  assert.ok(!result.matched_skills.includes('kubernetes'));
+});
