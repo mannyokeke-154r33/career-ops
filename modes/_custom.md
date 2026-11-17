@@ -1,7 +1,7 @@
-# JobFlow 30 search and review rules
+# JobFlow 15 search and recruiter outreach rules
 
 ## Daily goal
-- Target up to 30 *qualified, verified* applications per workday; do not equate discovered jobs or drafted applications with submissions.
+- Target up to 15 *qualified, verified* applications per workday; do not equate discovered jobs or drafted applications with submissions.
 - Prioritize suitability over volume. Do not invent vacancies, qualifications, experience, salary, or submitted status.
 - Use existing Career Ops discovery, evaluation, preparation, and tracker mechanisms before adding new infrastructure.
 
@@ -61,3 +61,12 @@
 - Galvani Capital, IT Assistant: confidential client-data maintenance, help desk support, hardware/software troubleshooting, system installs, updates, configurations and documentation.
 - Education screenshot: Walden University master's in Information Technology, Software Engineering specialization, August 2024-August 2026, with OOP and ETL skills displayed. Capella University Healthcare Administration/Management, January-June 2024; bachelor's degree level comes from candidate confirmation, not this screenshot. Third LinkedIn education entry not yet visible.
 - Apply role-specific evidence matching rather than broad title keyword matching. Missing project depth, exact tools, metrics methodology, or credentials must remain unverified until corroborated.
+
+## Recruiter and hiring-manager engagement
+- For each shortlisted vacancy, research a publicly identifiable recruiter or hiring manager on LinkedIn, when available, and record their role, profile URL, and confidence that they are relevant to this specific requisition.
+- Inspect publicly accessible professional posts or activities for an authentic, role-relevant interaction opportunity. Do not invent recent posts, engagement, connections, or relationships.
+- Prioritize submitting a strong application; do not delay an otherwise suitable application solely because a contact cannot be found.
+- After a verified application submission, draft a brief, individualized LinkedIn message identifying the exact role, company, and application. Never claim to have applied until confirmed.
+- Distinguish application count from recruiter contacts found, messages drafted, messages sent, and replies received. All outreach requires user review and explicit sending; never auto-like, auto-comment, auto-connect, or auto-message.
+- Avoid mass messaging, repeated unsolicited follow-ups, and generic praise. Respect platform limits, privacy, and the recipient's preferences.
+- Track recruiter lookup status, recruiter profile URL, interaction opportunity, application confirmation, message draft, message sent date, reply, and next follow-up. Store these per-job records privately, not in the public repository.
