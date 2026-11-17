@@ -20,4 +20,5 @@ jobs:
       - run: node --check scripts/jobflow15-outreach.mjs
       - run: node --check scripts/jobflow15-message.mjs
       - run: node --check scripts/jobflow15-pipeline.mjs
-      - run: node --test tests/jobflow30-shortlist.test.mjs tests/jobflow15-outreach.test.mjs tests/jobflow15-message.test.mjs tests/jobflow15-pipeline.test.mjs
+      - run: node --check scripts/jobflow15-enrich.mjs
+      - run: node --test tests/jobflow30-shortlist.test.mjs tests/jobflow15-outreach.test.mjs tests/jobflow15-message.test.mjs tests/jobflow15-pipeline.test.mjs tests/jobflow15-enrich.test.mjs
