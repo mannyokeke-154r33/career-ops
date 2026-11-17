@@ -39,3 +39,15 @@
 - Mark each matching signal as supported by CV, supported by LinkedIn, supported by GitHub, or unverified. Treat LinkedIn-only assertions as self-reported until corroborated.
 - Do not scrape LinkedIn behind authentication, bypass access controls, or automatically publish profile exports or personal history to this public repository.
 - The repository's linkedin-import.mjs imports LinkedIn *job alerts*, not candidate profile history. Do not treat it as a profile verifier.
+
+## LinkedIn screenshot evidence (candidate-provided, November 2026)
+- LinkedIn lists MEP Anuban Phatthalung School: Information Technology Specialist, May 2026-present; Technology and Mathematics Instructor, May 2026-present. These are concurrent roles at the same school.
+- LinkedIn lists Alignerr: freelance Generative AI Engineer, December 2025-present.
+- LinkedIn lists IDHS Chicago READ MHC: Pharmacy Technician, January 2024-June 2026.
+- LinkedIn lists TechHub Campus Repair: Information Technology Support Assistant, April 2022-August 2025.
+- LinkedIn lists Galvani Capital, LLC: Information Technology Assistant, June 2019-June 2023.
+- LinkedIn education screenshot lists Walden University, master's in Information Technology, Software Engineering specialization, August 2024-August 2026.
+- Screenshots truncate responsibilities and do not establish independently verified employment, quantified achievements, technical stack, or exact working hours. Do not extrapolate those details.
+- Do not add overlapping job durations together to claim total years of experience.
+- Favor matching roles in healthcare IT, technical support, application support, systems analysis, IT operations, healthcare data, implementation, and junior software engineering; assess software and AI engineering skill requirements against confirmed projects.
+- This is candidate-supplied evidence; before placing claims in tailored documents, reconcile with candidate-approved CV. Keep screenshots and detailed private career records outside the public repository.
