@@ -3,6 +3,7 @@
 // Usage: node scripts/jobflow30-shortlist.mjs input.json [output.json]
 import { readFileSync, writeFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
+import { matchEvidence } from './jobflow30-evidence.mjs';
 
 const TERMS = [
   ['healthcare it', 35], ['clinical systems', 35], ['ehr', 30],
@@ -34,7 +35,9 @@ export function evaluate(job) {
   if (!matched.length) reasons.push('job family match unverified');
   const score = Math.min(100, matched.reduce((n, [, weight]) => n + weight, 0) + (chicago ? 12 : 0) + (remote && illinoisAllowed ? 10 : 0));
   const status = reasons.length ? 'needs_review' : 'shortlisted';
-  return { ...job, score, status, reasons };
+  const evidence = matchEvidence(job);
+  const evidenceScore = Math.min(25, evidence.evidence_coverage_count * 3);
+  return { ...job, score: Math.min(100, Math.round(score * 0.75 + evidenceScore)), status, reasons, ...evidence };
 }
 export function shortlist(jobs, limit = 30) {
   if (!Array.isArray(jobs)) throw new TypeError('Expected JSON array of jobs');
