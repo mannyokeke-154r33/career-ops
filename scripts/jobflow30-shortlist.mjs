@@ -4,6 +4,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 import { matchEvidence } from './jobflow30-evidence.mjs';
+import { readPipeline } from './jobflow15-pipeline.mjs';
 
 const TERMS = [
   ['healthcare it', 35], ['clinical systems', 35], ['ehr', 30],
@@ -52,8 +53,12 @@ export function shortlist(jobs, limit = 15) {
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const [, , input, output] = process.argv;
-  if (!input) { console.error('Usage: node scripts/jobflow30-shortlist.mjs jobs.json [queue.json]'); process.exit(2); }
-  const data = shortlist(JSON.parse(readFileSync(input, 'utf8')));
+  if (!input) { console.error('Usage: node scripts/jobflow30-shortlist.mjs jobs.json [queue.json] | --pipeline data/pipeline.md [queue.json]'); process.exit(2); }
+  const pipelineMode = input === '--pipeline';
+  const source = pipelineMode ? output : input;
+  const destination = pipelineMode ? process.argv[4] : output;
+  if (!source) { console.error('Missing pipeline path'); process.exit(2); }
+  const data = shortlist(pipelineMode ? readPipeline(source) : JSON.parse(readFileSync(source, 'utf8')));
   const result = JSON.stringify(data, null, 2) + '\n';
-  if (output) writeFileSync(output, result); else process.stdout.write(result);
+  if (destination) writeFileSync(destination, result); else process.stdout.write(result);
 }
