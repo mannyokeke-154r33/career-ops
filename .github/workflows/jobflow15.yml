@@ -18,4 +18,5 @@ jobs:
       - run: node --check scripts/jobflow30-shortlist.mjs
       - run: node --check scripts/jobflow30-evidence.mjs
       - run: node --check scripts/jobflow15-outreach.mjs
-      - run: node --test tests/jobflow30-shortlist.test.mjs tests/jobflow15-outreach.test.mjs
+      - run: node --check scripts/jobflow15-message.mjs
+      - run: node --test tests/jobflow30-shortlist.test.mjs tests/jobflow15-outreach.test.mjs tests/jobflow15-message.test.mjs
