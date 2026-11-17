@@ -1,0 +1,35 @@
+#!/usr/bin/env node
+// Read-only JD enrichment through the existing Career Ops browser-extract.mjs.
+// Usage: node scripts/jobflow15-enrich.mjs data/jobflow15-queue.json data/jobflow15-enriched.json
+import { readFileSync, writeFileSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { dirname, resolve, join } from 'node:path';
+
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const EXTRACTOR = join(ROOT, 'browser-extract.mjs');
+export function enrichOne(job, run = spawnSync) {
+  if (!job || typeof job.url !== 'string' || !/^https?:\/\//i.test(job.url)) {
+    return { ...job, jd_status:'invalid_url', jd_verified:false };
+  }
+  const result = run(process.execPath, [EXTRACTOR, job.url, '--mode', 'jd', '--max-chars', '12000', '--timeout', '15000'], { encoding:'utf8', timeout:22000, maxBuffer:1024*1024 });
+  if (result.error || result.status !== 0) return { ...job, jd_status:'extraction_failed', jd_verified:false };
+  let parsed;
+  try { parsed = JSON.parse(result.stdout); } catch { return { ...job, jd_status:'invalid_extractor_output', jd_verified:false }; }
+  if (!parsed || typeof parsed.text !== 'string' || parsed.text.trim().length < 200) return { ...job, jd_status:'insufficient_text', jd_verified:false };
+  // Extractor text is posting-page content, not independent verification of hiring requirements.
+  return { ...job, description:parsed.text, jd_status:'extracted', jd_verified:false, jd_extracted_at:new Date().toISOString() };
+}
+export function enrichQueue(queue, run = spawnSync) {
+  if (!queue || !Array.isArray(queue.shortlisted)) throw new TypeError('Expected shortlist output with shortlisted array');
+  return { ...queue, shortlisted:queue.shortlisted.map(job=>enrichOne(job,run)), note:'Read-only job description extraction. Verify postings and requirements manually. No application or LinkedIn action performed.' };
+}
+if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
+  const [,,input,output] = process.argv;
+  if (!input || !output) { console.error('Usage: node scripts/jobflow15-enrich.mjs shortlist.json enriched.json'); process.exit(2); }
+  try {
+    const enriched = enrichQueue(JSON.parse(readFileSync(input,'utf8')));
+    writeFileSync(output,JSON.stringify(enriched,null,2)+'\n',{mode:0o600});
+    console.log('Enriched '+enriched.shortlisted.length+' jobs. Review failures and verify job descriptions manually.');
+  } catch(e) { console.error(e.message); process.exitCode=1; }
+}
