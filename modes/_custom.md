@@ -51,3 +51,13 @@
 - Do not add overlapping job durations together to claim total years of experience.
 - Favor matching roles in healthcare IT, technical support, application support, systems analysis, IT operations, healthcare data, implementation, and junior software engineering; assess software and AI engineering skill requirements against confirmed projects.
 - This is candidate-supplied evidence; before placing claims in tailored documents, reconcile with candidate-approved CV. Keep screenshots and detailed private career records outside the public repository.
+
+## Expanded LinkedIn responsibilities and education screenshots (candidate-provided)
+- MEP Anuban Phatthalung School, IT Specialist: supports school web-platform infrastructure, teaches Cambridge programming fundamentals, troubleshoots hardware/software, communicates with nontechnical users.
+- Same school, Technology and Mathematics Instructor: teaches Cambridge mathematics to Primary 5/6 and programming, uses assessments and targeted reinforcement, supports school web platform. Concurrent duties must not be double-counted as separate full-time years.
+- Alignerr, freelance Generative AI Engineer: prompt refinement, LLM evaluation, RLHF-style human feedback, annotated datasets and evaluation criteria, healthcare/pharmacy-domain review of AI-generated medical content. No evidence here of production model deployment or training infrastructure ownership.
+- IDHS Chicago READ MHC, Pharmacy Technician: Epic EHR and pharmacy information systems, prescription processing, medication management, privacy/HIPAA practices, secure high-volume data entry, database record maintenance, Microsoft Office.
+- TechHub Campus Repair, IT Support Assistant: hardware/software troubleshooting, Python scripts for system health checks and software installation; LinkedIn self-reports 15% lower average service resolution time. Treat metric as candidate-reported, not independently measured.
+- Galvani Capital, IT Assistant: confidential client-data maintenance, help desk support, hardware/software troubleshooting, system installs, updates, configurations and documentation.
+- Education screenshot: Walden University master's in Information Technology, Software Engineering specialization, August 2024-August 2026, with OOP and ETL skills displayed. Capella University Healthcare Administration/Management, January-June 2024; bachelor's degree level comes from candidate confirmation, not this screenshot. Third LinkedIn education entry not yet visible.
+- Apply role-specific evidence matching rather than broad title keyword matching. Missing project depth, exact tools, metrics methodology, or credentials must remain unverified until corroborated.
