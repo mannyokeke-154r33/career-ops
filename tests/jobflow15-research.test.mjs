@@ -13,3 +13,11 @@ test('produces one checklist per shortlisted job',()=>{
  assert.equal(q.count,1);
  assert.equal(q.contacts[0].application_confirmed,false);
 });
+
+test('supports manual batch recommended array',()=>{
+ const batch={recommended:[{company:'Example Health',title:'Clinical Systems Analyst',url:'https://example.org/job'}]};
+ const result=buildResearchQueue(batch);
+ assert.equal(result.count,1);
+ assert.equal(result.contacts[0].contact_name,null);
+ assert.equal(result.contacts[0].application_confirmed,false);
+});
