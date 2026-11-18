@@ -21,9 +21,10 @@ const isHttpUrl = url => {
  * The evaluator is injectable for deterministic offline tests.
  * "Recommend" is a shortlist for human verification, not a hiring guarantee.
  */
-export function assessManualBatch(postings, { evaluator = evaluate, limit = 15 } = {}) {
+export function assessManualBatch(postings, { evaluator = evaluate, limit = 15, minimumScore = 60 } = {}) {
   if (!Array.isArray(postings)) throw new TypeError('Expected an array of job postings');
   if (!Number.isInteger(limit) || limit < 1 || limit > 15) throw new RangeError('Daily recommendation limit must be 1 to 15');
+  if (!Number.isFinite(minimumScore) || minimumScore < 0 || minimumScore > 100) throw new RangeError('Minimum fit score must be between 0 and 100');
 
   const seen = new Set();
   const records = [];
@@ -46,6 +47,7 @@ export function assessManualBatch(postings, { evaluator = evaluate, limit = 15 }
       : evaluator(job);
     if (result.status !== 'shortlisted') problems.push(...(result.reasons || ['eligibility or role matching requires review']));
     if (!result.evidence_coverage_count) problems.push('no candidate evidence linked to posting requirements');
+    if (!Number.isFinite(Number(result.score)) || Number(result.score) < minimumScore) problems.push('preliminary fit score below review threshold');
 
     const decision = problems.length ? 'needs_review' : 'recommend';
     records.push({
@@ -68,6 +70,7 @@ export function assessManualBatch(postings, { evaluator = evaluate, limit = 15 }
     unique_count:records.length,
     duplicates_removed:duplicates,
     daily_limit:limit,
+    minimum_fit_score:minimumScore,
     recommended,
     reserve:overflow,
     needs_review,
