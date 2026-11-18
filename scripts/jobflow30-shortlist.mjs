@@ -46,7 +46,7 @@ export function evaluate(job, evidenceEntries) {
   const usRemote = remote && (chicago || /\b(?:united states|usa|u\.s\.|nationwide|illinois|IL)\b/i.test(location));
   const restriction = residency(description);
   const remoteRestricted = Boolean(remote && restriction && !/\b(?:illinois|IL)\b/i.test(restriction));
-  const illinoisExcluded = remote && /\b(?:except|excluding|not available in|not hiring in|cannot work from|not eligible in)\s+(?:the state of\s+)?(?:illinois|IL)\b/i.test(location+' '+description);
+  const illinoisExcluded = remote && /\b(?:except|exclude(?:s|d|ing)?|not available in|not hiring in|cannot work from|not eligible in)\s+(?:the state of\s+)?(?:illinois|IL)\b/i.test(location+' '+description);
   const role = ROLE_FAMILIES.find(family => family.pattern.test(title));
   const reasons = [];
   if (!title || !job.url || !job.company) reasons.push('missing job identity');
