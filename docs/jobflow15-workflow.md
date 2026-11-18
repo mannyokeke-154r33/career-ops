@@ -2,6 +2,8 @@
 
 This feature targets **up to 15 reviewed applications per day**. No application or LinkedIn action is automatic.
 
+**Privacy:** keep candidate data in ignored local files. Do not commit `config/profile.yml`, `modes/_custom.md`, or `data/jobflow15-evidence.json` into the public fork. The public implementation loads evidence from `CAREER_OPS_EVIDENCE_PATH` or `data/jobflow15-evidence.json`. If missing, the matching results explicitly have zero evidence matches instead of using hard-coded personal claims.
+
 ## Daily process
 
 1. Run the existing Career Ops scanner: `node scan.mjs`. It writes new offers to `data/pipeline.md` in its Pending section.
@@ -11,6 +13,19 @@ This feature targets **up to 15 reviewed applications per day**. No application 
 5. Look for a genuine role-related public interaction opportunity. Do not mass-like, comment, or connect automatically.
 6. After confirming submission, draft a concise personal message with the exact role and one relevant evidence-backed experience example. Review and send manually.
 7. Log outreach and follow-up. Do not claim a message was sent unless it was actually sent.
+
+## Private evidence file
+
+Create `data/jobflow15-evidence.json` locally (not in Git) with records using this generic format:
+
+```json
+[
+  { "id": "clinical-system", "source": "candidate", "kind": "experience", "label": "Documented clinical system experience", "terms": ["EHR", "Epic"] },
+  { "id": "sql-training", "source": "candidate", "kind": "credential", "label": "SQL assessment", "terms": ["SQL"] }
+]
+```
+
+Descriptions must accurately reflect confirmed candidate records. Do not count source labels as independent verification.
 
 ## Local tracker
 
