@@ -8,7 +8,7 @@
 
 1. Supply the day's ~20 to 30 job links with the actual job description when possible. Screenshots and pasted text can be evaluated in chat; the CLI accepts structured JSON arrays of objects with `title`, `company`, `url`, `location`, and `description`. Optional fields include `requisition_id` and `requirements`.
 2. Evaluate the batch using `node scripts/jobflow15-manual-batch.mjs data/today-jobs.json data/jobflow15-daily.json`.
-3. Review `recommended` (maximum 15), `needs_review`, and `reserve`. Recommendation requires a full description, relevant candidate evidence, and an initial eligibility check. This is a heuristic decision, not a verified employer ATS score or application receipt.
+3. Review `recommended` (maximum 15), `needs_review`, and `reserve`. Recommendation requires a full description, relevant candidate evidence, an initial eligibility check, and a preliminary fit score of at least 60/100 by default. This score is a user-defined triage heuristic, not a validated employer ATS score. The score is a heuristic decision, not a verified employer ATS score or application receipt.
 4. For recommended vacancies, check the original posting is live, confirm all mandatory qualifications, and manually review a tailored resume and cover letter.
 5. Research a relevant public LinkedIn recruiter or hiring manager profile and check their present employer and association with this role. Do not infer the recruiter owns the role merely from their title.
 6. Submit each application only with candidate action/approval. Following confirmed submission, draft and manually send a genuine, personalized LinkedIn note. Never mass-like, mass-comment, or automatically message contacts.
