@@ -23,7 +23,20 @@ export function enrichOne(job, run = spawnSync) {
 }
 export function enrichQueue(queue, run = spawnSync) {
   if (!queue || !Array.isArray(queue.shortlisted)) throw new TypeError('Expected shortlist output with shortlisted array');
-  return { ...queue, shortlisted:queue.shortlisted.map(job=>{ const enriched=enrichOne(job,run); return { ...evaluate(enriched), jd_status:enriched.jd_status, jd_verified:enriched.jd_verified, ...(enriched.jd_extracted_at ? {jd_extracted_at:enriched.jd_extracted_at} : {}) }; }).sort((a,b)=>b.score-a.score), note:'Read-only job description extraction. Verify postings and requirements manually. No application or LinkedIn action performed.' };
+  const evaluated = queue.shortlisted.map(job => {
+    const enriched = enrichOne(job, run);
+    if (enriched.jd_status !== 'extracted') {
+      return { ...job, ...enriched, status:'needs_review', reasons:[...new Set([...(job.reasons || []), 'job description extraction unsuccessful'])] };
+    }
+    const scored = evaluate(enriched);
+    return { ...scored, jd_status:enriched.jd_status, jd_verified:enriched.jd_verified, jd_extracted_at:enriched.jd_extracted_at };
+  });
+  return {
+    ...queue,
+    shortlisted:evaluated.filter(job=>job.status==='shortlisted').sort((a,b)=>b.score-a.score),
+    needs_review:[...(queue.needs_review || []), ...evaluated.filter(job=>job.status==='needs_review')],
+    note:'Read-only job description extraction. Failed or restricted postings move to needs_review; verify requirements and availability manually. No application or LinkedIn action performed.'
+  };
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   const [,,input,output] = process.argv;
