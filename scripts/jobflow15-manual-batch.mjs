@@ -31,7 +31,7 @@ export function assessManualBatch(postings, { evaluator = evaluate, limit = 15, 
   let duplicates = 0;
   for (const [index, source] of postings.entries()) {
     const job = source && typeof source === 'object' && !Array.isArray(source) ? source : {};
-    const key = uniqueKey(job);
+    const key = (normalized(job.company) && normalized(job.requisition_id || job.id || job.url)) ? uniqueKey(job) : `invalid-${index}`;
     if (seen.has(key)) { duplicates++; continue; }
     seen.add(key);
 
@@ -49,7 +49,9 @@ export function assessManualBatch(postings, { evaluator = evaluate, limit = 15, 
     if (!result.evidence_coverage_count) problems.push('no candidate evidence linked to posting requirements');
     if (!Number.isFinite(Number(result.score)) || Number(result.score) < minimumScore) problems.push('preliminary fit score below review threshold');
 
-    const decision = problems.length ? 'needs_review' : 'recommend';
+    const hardBlocks = ['senior leadership title', 'not Chicago on-site/hybrid'];
+    const blocked = (result.reasons || []).some(reason => hardBlocks.includes(reason));
+    const decision = blocked ? 'do_not_prioritize' : problems.length ? 'needs_review' : 'recommend';
     records.push({
       ...result,
       input_position:index+1,
@@ -64,6 +66,7 @@ export function assessManualBatch(postings, { evaluator = evaluate, limit = 15, 
   const recommended=eligible.slice(0,limit);
   const overflow=eligible.slice(limit).map(x=>({...x,decision:'reserve',review_reasons:['Daily recommendation cap reached']}));
   const needs_review=records.filter(x=>x.decision==='needs_review').sort(rank);
+  const do_not_prioritize=records.filter(x=>x.decision==='do_not_prioritize').sort(rank);
   return {
     generated_at:new Date().toISOString(),
     supplied_count:postings.length,
@@ -74,6 +77,7 @@ export function assessManualBatch(postings, { evaluator = evaluate, limit = 15, 
     recommended,
     reserve:overflow,
     needs_review,
+    do_not_prioritize,
     note:'Manual batch decision support only. All fit evidence is candidate-reported unless independently corroborated. No live posting verification, job application, LinkedIn action or recruiter outreach was performed.'
   };
 }
@@ -84,6 +88,6 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
   try {
     const results=assessManualBatch(JSON.parse(readFileSync(input,'utf8')));
     writeFileSync(output,JSON.stringify(results,null,2)+'\n',{mode:0o600});
-    console.log(`Reviewed ${results.unique_count} unique postings: ${results.recommended.length} recommendations, ${results.needs_review.length} need review, ${results.reserve.length} reserve. No applications sent.`);
+    console.log(`Reviewed ${results.unique_count} unique postings: ${results.recommended.length} recommendations, ${results.needs_review.length} need review, ${results.do_not_prioritize.length} not prioritized, ${results.reserve.length} reserve. No applications sent.`);
   } catch(err) { console.error(err.message);process.exitCode=1; }
 }
