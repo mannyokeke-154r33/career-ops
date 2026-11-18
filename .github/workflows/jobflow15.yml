@@ -1,0 +1,31 @@
+name: JobFlow 15 validation
+on:
+  workflow_dispatch:
+  push:
+    branches: [feature/jobflow15-clean]
+  pull_request:
+    paths:
+      - 'scripts/jobflow*.mjs'
+      - 'tests/jobflow*.test.mjs'
+      - '.github/workflows/jobflow15.yml'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22'
+      - run: node --check scripts/jobflow30-shortlist.mjs
+      - run: node --check scripts/jobflow30-evidence.mjs
+      - run: node --check scripts/jobflow15-manual-batch.mjs
+      - run: node --check scripts/jobflow15-outreach.mjs
+      - run: node --check scripts/jobflow15-message.mjs
+      - run: node --check scripts/jobflow15-pipeline.mjs
+      - run: node --check scripts/jobflow15-enrich.mjs
+      - run: node --check scripts/jobflow15-research.mjs
+      - run: node --test tests/jobflow30-evidence.test.mjs tests/jobflow30-shortlist.test.mjs tests/jobflow15-outreach.test.mjs tests/jobflow15-message.test.mjs tests/jobflow15-pipeline.test.mjs tests/jobflow15-enrich.test.mjs tests/jobflow15-research.test.mjs tests/jobflow15-integration.test.mjs tests/jobflow15-manual-batch.test.mjs tests/jobflow15-manual-integration.test.mjs
