@@ -109,6 +109,10 @@ export function shortlist(jobs, limit = 15) {
 }
 
 if (isMainModule(import.meta.url)) {
+  if (process.argv.includes('--help') || process.argv.includes('-h')) {
+    console.log("Usage: node scripts/jobflow30-shortlist.mjs jobs.json [queue.json] | --pipeline data/pipeline.md [queue.json]");
+    process.exit(0);
+  }
   const [,,input,output] = process.argv;
   if (!input) {console.error('Usage: node scripts/jobflow30-shortlist.mjs jobs.json [queue.json] | --pipeline data/pipeline.md [queue.json]');process.exit(2);}
   const pipelineMode = input === '--pipeline';
