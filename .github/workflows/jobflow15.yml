@@ -1,5 +1,6 @@
 name: JobFlow 15 validation
 on:
+  workflow_dispatch:
   push:
     branches: [feature/jobflow15-clean]
   pull_request:
