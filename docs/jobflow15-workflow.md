@@ -1,52 +1,59 @@
-# JobFlow 15: Recruiter engagement workflow
+# JobFlow 15: Manual daily job batches and recruiter outreach
 
-This feature targets **up to 15 reviewed applications per day**. No application or LinkedIn action is automatic.
+**Operating agreement:** The candidate supplies approximately 20 to 30 vacancies per day. Assess those postings and recommend **at most 15**, with fewer if the evidence does not support 15 good matches. No automatic vacancy search is required. No application, LinkedIn interaction, or message is sent by this software.
 
-**Privacy:** keep candidate data in ignored local files. Do not commit `config/profile.yml`, `modes/_custom.md`, or `data/jobflow15-evidence.json` into the public fork. The public implementation loads evidence from `CAREER_OPS_EVIDENCE_PATH` or `data/jobflow15-evidence.json`. If missing, the matching results explicitly have zero evidence matches instead of using hard-coded personal claims.
+**Privacy:** Candidate profiles, evidence, outreach records, and posting dumps belong in ignored local files. Do not commit `config/profile.yml`, `modes/_custom.md`, `data/jobflow15-evidence.json`, daily vacancy dumps, or recruiter details to the public repository. Matching loads evidence from `CAREER_OPS_EVIDENCE_PATH` or `data/jobflow15-evidence.json`; missing evidence produces zero matches, never invented claims.
 
-## Daily process
+## Candidate-controlled daily cycle
 
-1. Run the existing Career Ops scanner: `node scan.mjs`. It writes new offers to `data/pipeline.md` in its Pending section.
-2. Run `node scripts/jobflow30-shortlist.mjs --pipeline data/pipeline.md data/jobflow15-queue.json`. The legacy filename is retained for compatibility, but the default limit is 15. Alternatively provide a JSON array of jobs as the first argument. Scanner pipeline rows do not include full job descriptions, so verify qualifications manually before relying on evidence matches.
-3. Verify the original posting, eligibility, relevant experience, and actual application requirements. Review the tailored resume and submit the application manually.
-4. For each role, identify a recruiter or hiring manager using public professional information. Record whether their connection to the requisition is confirmed, possible, or unverified. Avoid assuming a contact owns a requisition based only on their title.
-5. Look for a genuine role-related public interaction opportunity. Do not mass-like, comment, or connect automatically.
-6. After confirming submission, draft a concise personal message with the exact role and one relevant evidence-backed experience example. Review and send manually.
-7. Log outreach and follow-up. Do not claim a message was sent unless it was actually sent.
+1. Supply the day's ~20 to 30 job links with the actual job description when possible. Screenshots and pasted text can be evaluated in chat; the CLI accepts structured JSON arrays of objects with `title`, `company`, `url`, `location`, and `description`. Optional fields include `requisition_id` and `requirements`.
+2. Evaluate the batch using `node scripts/jobflow15-manual-batch.mjs data/today-jobs.json data/jobflow15-daily.json`.
+3. Review `recommended` (maximum 15), `needs_review`, and `reserve`. Recommendation requires a full description, relevant candidate evidence, and an initial eligibility check. This is a heuristic decision, not a verified employer ATS score or application receipt.
+4. For recommended vacancies, check the original posting is live, confirm all mandatory qualifications, and manually review a tailored resume and cover letter.
+5. Research a relevant public LinkedIn recruiter or hiring manager profile and check their present employer and association with this role. Do not infer the recruiter owns the role merely from their title.
+6. Submit each application only with candidate action/approval. Following confirmed submission, draft and manually send a genuine, personalized LinkedIn note. Never mass-like, mass-comment, or automatically message contacts.
+7. Privately record what was submitted, whom you contacted, replies, and follow-ups. No recruiter contact is required for a role to be recommended.
 
-## Private evidence file
+## Private evidence format
 
-Create `data/jobflow15-evidence.json` locally (not in Git) with records using this generic format:
+Provide candidate-approved information locally as `data/jobflow15-evidence.json`, for example:
 
 ```json
 [
-  { "id": "clinical-system", "source": "candidate", "kind": "experience", "label": "Documented clinical system experience", "terms": ["EHR", "Epic"] },
-  { "id": "sql-training", "source": "candidate", "kind": "credential", "label": "SQL assessment", "terms": ["SQL"] }
+  {"id":"ehr-example","source":"candidate","kind":"experience","label":"Documented EHR work","terms":["EHR","Epic"]},
+  {"id":"sql-example","source":"candidate","kind":"credential","label":"SQL assessment","terms":["SQL"]}
 ]
 ```
 
-Descriptions must accurately reflect confirmed candidate records. Do not count source labels as independent verification.
+These are illustrative entries, not claims about the candidate. The evidence matcher returns matched terms and source labels, but does not independently validate them. The candidate should confirm substantive claims before including them in applications.
 
-## Local tracker
+## Optional local CLI and existing Career Ops integration
 
-All commands run from the repository root. Default storage: `data/jobflow15-outreach.json`, which is ignored by Git.
+The historical scanner and `scripts/jobflow30-shortlist.mjs` remain available as optional tools, but **they are not the default for the manual daily batch workflow**.
 
 ```sh
-node scripts/jobflow15-outreach.mjs set acme-123 company "Acme"
-node scripts/jobflow15-outreach.mjs set acme-123 title "Clinical Systems Analyst"
-node scripts/jobflow15-outreach.mjs set acme-123 recruiter_url "https://www.linkedin.com/in/example"
-node scripts/jobflow15-outreach.mjs set acme-123 recruiter_relevance possible
-node scripts/jobflow15-outreach.mjs set acme-123 application_status applied
-node scripts/jobflow15-outreach.mjs set acme-123 message_status drafted
+node scripts/jobflow15-manual-batch.mjs data/today-jobs.json data/jobflow15-daily.json
+node scripts/jobflow15-research.mjs data/jobflow15-daily.json data/jobflow15-research.json
 node scripts/jobflow15-outreach.mjs list
 ```
 
-Mark `message_status sent` only after actually sending the message. You may also record `message_sent_date`, `reply_status`, and `follow_up_date`. Dates are entered manually. This tool does not schedule reminders or message anyone.
+The recruiter research script expects a `shortlisted` array rather than the manual batch's `recommended` array. Therefore, until the formats are unified, use the research script with the legacy shortlist output rather than invoking the second command on the manual batch output. This compatibility issue is tracked for resolution before launch.
 
-## Test commands
+The optional existing scanner path is:
 
 ```sh
-node --test tests/jobflow30-shortlist.test.mjs tests/jobflow15-outreach.test.mjs tests/jobflow15-message.test.mjs tests/jobflow15-pipeline.test.mjs tests/jobflow15-enrich.test.mjs tests/jobflow15-research.test.mjs tests/jobflow15-recruiter-research.test.mjs tests/jobflow15-recruiter-research.test.mjs
+node scan.mjs
+node scripts/jobflow30-shortlist.mjs --pipeline data/pipeline.md data/jobflow15-queue.json
+node scripts/jobflow15-enrich.mjs data/jobflow15-queue.json data/jobflow15-enriched.json
+node scripts/jobflow15-research.mjs data/jobflow15-enriched.json data/jobflow15-research.json
 ```
 
-The shortlist uses heuristic keyword and candidate-reported evidence matching, not verified hiring-manager ownership or an employer ATS score. A Pending-pipeline adapter is implemented, but scanner output does not include full descriptions and no end-to-end run has been verified. Manual LinkedIn-focused search links are generated, but no contact is automatically identified or verified. Recruiter research generates manual search links, not actual LinkedIn profile retrieval or verified contact identification. No automatic application submission, outreach, or scheduled follow-up has been implemented yet.
+A LinkedIn public search link is not proof of recruiter identification. All outreach remains manual.
+
+## Validation
+
+```sh
+node --test tests/jobflow*.test.mjs
+```
+
+The dedicated CI workflow also runs syntax checks. Do not merge until the **latest commit** has passed the relevant checks. Repository-wide security and dependency failures must be resolved or appropriately assessed. No live job application, LinkedIn message, or real vacancy evaluation is performed by the tests.
