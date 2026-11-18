@@ -22,10 +22,11 @@ jobs:
           node-version: '22'
       - run: node --check scripts/jobflow30-shortlist.mjs
       - run: node --check scripts/jobflow30-evidence.mjs
+      - run: node --check scripts/jobflow15-manual-batch.mjs
       - run: node --check scripts/jobflow15-outreach.mjs
       - run: node --check scripts/jobflow15-message.mjs
       - run: node --check scripts/jobflow15-pipeline.mjs
       - run: node --check scripts/jobflow15-enrich.mjs
       - run: node --check scripts/jobflow15-research.mjs
       - run: node --check scripts/jobflow15-manual-batch.mjs
-      - run: node --test tests/jobflow30-shortlist.test.mjs tests/jobflow15-outreach.test.mjs tests/jobflow15-message.test.mjs tests/jobflow15-pipeline.test.mjs tests/jobflow15-enrich.test.mjs tests/jobflow15-research.test.mjs tests/jobflow15-integration.test.mjs tests/jobflow15-manual-batch.test.mjs tests/jobflow15-manual-integration.test.mjs
+      - run: node --test tests/jobflow30-evidence.test.mjs tests/jobflow30-shortlist.test.mjs tests/jobflow15-outreach.test.mjs tests/jobflow15-message.test.mjs tests/jobflow15-pipeline.test.mjs tests/jobflow15-enrich.test.mjs tests/jobflow15-research.test.mjs tests/jobflow15-integration.test.mjs tests/jobflow15-manual-batch.test.mjs tests/jobflow15-manual-integration.test.mjs
