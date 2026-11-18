@@ -4,7 +4,7 @@
 //        node scripts/jobflow15-outreach.mjs set <job-id> <field> <value>
 import { readFileSync, writeFileSync, mkdirSync, renameSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { isMainModule } from '../lib/is-main-module.mjs';
 
 const fields = new Set(['company','title','job_url','recruiter_name','recruiter_role','recruiter_url','recruiter_relevance','public_post_url','interaction_note','application_status','application_date','message_draft','message_status','message_sent_date','reply_status','follow_up_date']);
 const allowed = {
@@ -34,7 +34,7 @@ export function save(path, data) {
   writeFileSync(temp,JSON.stringify(data,null,2)+'\n',{mode:0o600});
   renameSync(temp,path);
 }
-if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
+if (isMainModule(import.meta.url)) {
   const [,,cmd,id,field,...rest] = process.argv;
   const path = resolve(process.env.CAREER_OPS_OUTREACH_PATH || 'data/jobflow15-outreach.json');
   try {
