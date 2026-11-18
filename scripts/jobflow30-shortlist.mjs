@@ -2,7 +2,7 @@
 // JobFlow 15 conservative shortlist. The daily manual batch is the default workflow.
 // Legacy script path is retained for existing CLI integrations.
 import { readFileSync, writeFileSync } from 'node:fs';
-import { pathToFileURL } from 'node:url';
+import { isMainModule } from '../lib/is-main-module.mjs';
 import { resolve } from 'node:path';
 import { matchEvidence } from './jobflow30-evidence.mjs';
 import { readPipeline } from './jobflow15-pipeline.mjs';
@@ -108,7 +108,7 @@ export function shortlist(jobs, limit = 15) {
   };
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
+if (isMainModule(import.meta.url)) {
   const [,,input,output] = process.argv;
   if (!input) {console.error('Usage: node scripts/jobflow30-shortlist.mjs jobs.json [queue.json] | --pipeline data/pipeline.md [queue.json]');process.exit(2);}
   const pipelineMode = input === '--pipeline';
