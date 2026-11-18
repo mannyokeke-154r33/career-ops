@@ -58,3 +58,24 @@ test('role, geography and experience contribute separately to score', () => {
   assert.equal(result.score,72);
   assert.equal(result.evidence_matches[0].source,'synthetic');
 });
+
+test('Chicago Heights and Chicago Ridge do not qualify as Chicago city jobs', () => {
+  for (const location of ['Chicago Heights, IL', 'Chicago Ridge, IL']) {
+    const result = evaluate(job({location}));
+    assert.equal(result.status, 'needs_review');
+    assert.ok(result.reasons.includes('Chicago city location requires verification'));
+  }
+});
+test('Greater Chicago metro label needs city verification', () => {
+  const result = evaluate(job({location:'Greater Chicago Area'}));
+  assert.equal(result.status, 'needs_review');
+  assert.ok(result.reasons.includes('Chicago city location requires verification'));
+});
+test('explicit Illinois remote exclusion needs review', () => {
+  const result = evaluate(job({
+    location:'Remote, United States',
+    description:'Work from anywhere in the USA, excluding Illinois.'
+  }));
+  assert.equal(result.status,'needs_review');
+  assert.ok(result.reasons.includes('Illinois explicitly excluded from remote location'));
+});
