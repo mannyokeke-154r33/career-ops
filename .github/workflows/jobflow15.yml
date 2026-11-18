@@ -1,17 +1,21 @@
 name: JobFlow 15 validation
 on:
   push:
-    branches: [feature/us-chicago-job-targeting]
+    branches: [feature/jobflow15-clean]
   pull_request:
     paths:
       - 'scripts/jobflow*.mjs'
       - 'tests/jobflow*.test.mjs'
       - '.github/workflows/jobflow15.yml'
+permissions:
+  contents: read
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '22'
@@ -22,6 +26,4 @@ jobs:
       - run: node --check scripts/jobflow15-pipeline.mjs
       - run: node --check scripts/jobflow15-enrich.mjs
       - run: node --check scripts/jobflow15-research.mjs
-      - run: node --check scripts/jobflow15-recruiter-research.mjs
-      - run: node --check scripts/jobflow15-recruiter-research.mjs
-      - run: node --test tests/jobflow30-shortlist.test.mjs tests/jobflow15-outreach.test.mjs tests/jobflow15-message.test.mjs tests/jobflow15-pipeline.test.mjs tests/jobflow15-enrich.test.mjs tests/jobflow15-research.test.mjs tests/jobflow15-recruiter-research.test.mjs tests/jobflow15-recruiter-research.test.mjs
+      - run: node --test tests/jobflow30-shortlist.test.mjs tests/jobflow15-outreach.test.mjs tests/jobflow15-message.test.mjs tests/jobflow15-pipeline.test.mjs tests/jobflow15-enrich.test.mjs tests/jobflow15-research.test.mjs
