@@ -24,8 +24,9 @@ export function researchPlan(job) {
   };
 }
 export function buildResearchQueue(data) {
-  if (!data || !Array.isArray(data.shortlisted)) throw new TypeError('Expected shortlisted array');
-  return {generated_at:new Date().toISOString(), count:data.shortlisted.length, contacts:data.shortlisted.map(researchPlan)};
+  const jobs = Array.isArray(data?.recommended) ? data.recommended : data?.shortlisted;
+  if (!Array.isArray(jobs)) throw new TypeError('Expected recommended or shortlisted array');
+  return {generated_at:new Date().toISOString(), count:jobs.length, contacts:jobs.map(researchPlan)};
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   const [,,input,output]=process.argv;
