@@ -29,6 +29,10 @@ export function buildResearchQueue(data) {
   return {generated_at:new Date().toISOString(), count:jobs.length, contacts:jobs.map(researchPlan)};
 }
 if (isMainModule(import.meta.url)) {
+  if (process.argv.includes('--help') || process.argv.includes('-h')) {
+    console.log("Usage: node scripts/jobflow15-research.mjs shortlist.json research.json");
+    process.exit(0);
+  }
   const [,,input,output]=process.argv;
   if (!input || !output) {console.error('Usage: node scripts/jobflow15-research.mjs shortlist.json research.json');process.exit(2);}
   try {
