@@ -40,6 +40,10 @@ export function enrichQueue(queue, run = spawnSync) {
   };
 }
 if (isMainModule(import.meta.url)) {
+  if (process.argv.includes('--help') || process.argv.includes('-h')) {
+    console.log("Usage: node scripts/jobflow15-enrich.mjs shortlist.json enriched.json");
+    process.exit(0);
+  }
   const [,,input,output] = process.argv;
   if (!input || !output) { console.error('Usage: node scripts/jobflow15-enrich.mjs shortlist.json enriched.json'); process.exit(2); }
   try {
