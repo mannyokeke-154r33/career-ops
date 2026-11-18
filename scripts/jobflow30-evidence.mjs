@@ -6,8 +6,12 @@ const normalize = s => String(s ?? '').toLowerCase().replace(/[-_/]/g,' ').repla
 function wordsMatch(haystack, needle) {
   const term = normalize(needle);
   if (!term) return false;
-  const text = ' '+haystack.replace(/[^a-z0-9]+/g,' ')+' ';
-  return text.includes(' '+term.replace(/[^a-z0-9]+/g,' ')+' ');
+  // Preserve punctuation that distinguishes programming languages and tools
+  // such as C++, C#, Node.js and .NET. Removing punctuation turns "C++" into
+  // the lone letter "c", producing false matches.
+  const escaped = term.replace(/[.*+?^\x24{}()|[\]\\]/g, '\\  const text = ' '+haystack.replace(/[^a-z0-9]+/g,' ')+' ';
+  return text.includes(' '+term.replace(/[^a-z0-9]+/g,' ')+' ');');
+  return new RegExp('(^|[^a-z0-9+#.])'+escaped+'(?=$|[^a-z0-9+#.])','i').test(haystack);
 }
 export function loadEvidence(path = process.env.CAREER_OPS_EVIDENCE_PATH || 'data/jobflow15-evidence.json') {
   try {
