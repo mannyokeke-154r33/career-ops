@@ -88,3 +88,12 @@ test('remote role with Illinois exclusion phrased as excludes is flagged', () =>
   assert.equal(result.status,'needs_review');
   assert.ok(result.reasons.includes('Illinois explicitly excluded from remote location'));
 });
+
+test('remote location excludes Illinois with excluding wording', () => {
+  const result = evaluate(job({
+    location: 'Remote, United States',
+    description: 'Remote work is available in the USA, excluding Illinois.'
+  }));
+  assert.equal(result.status,'needs_review');
+  assert.ok(result.reasons.includes('Illinois explicitly excluded from remote location'));
+});
