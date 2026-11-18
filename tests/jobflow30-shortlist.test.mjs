@@ -33,3 +33,13 @@ test('includes recruiter research and outreach states without claiming submissio
   assert.equal(result.outreach.application_confirmed, false);
   assert.equal(result.outreach.message_status, 'not_drafted');
 });
+
+test('flags state-restricted remote role despite United States label', () => {
+  const result=evaluate(job({location:'Remote, United States',description:'Applicants must reside in California.'}));
+  assert.equal(result.status,'needs_review');
+  assert.ok(result.reasons.includes('remote residency restriction requires review'));
+});
+test('permits explicit Illinois residency restriction', () => {
+  const result=evaluate(job({location:'Remote, United States',description:'Applicants must reside in Illinois.'}));
+  assert.equal(result.status,'shortlisted');
+});
