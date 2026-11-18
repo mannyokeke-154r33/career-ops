@@ -59,11 +59,11 @@ test('role, geography and experience contribute separately to score', () => {
   assert.equal(result.evidence_matches[0].source,'synthetic');
 });
 
-test('Chicago Heights and Chicago Ridge do not qualify as Chicago city jobs', () => {
+test('Chicago Heights and Chicago Ridge are outside the target city', () => {
   for (const location of ['Chicago Heights, IL', 'Chicago Ridge, IL']) {
     const result = evaluate(job({location}));
     assert.equal(result.status, 'needs_review');
-    assert.ok(result.reasons.includes('Chicago city location requires verification'));
+    assert.ok(result.reasons.includes('not Chicago on-site/hybrid'));
   }
 });
 test('Greater Chicago metro label needs city verification', () => {
