@@ -54,3 +54,14 @@ test('rejects missing URL and invalid batch size',()=>{
   assert.equal(result.recommended.length,0);
   assert.throws(()=>assessManualBatch([], {limit:16}),RangeError);
 });
+
+test('does not promote weak keyword matches to final recommendations',()=>{
+  const result=assessManualBatch([job(1,{rating:42})],{evaluator:evaluated});
+  assert.equal(result.recommended.length,0);
+  assert.ok(result.needs_review[0].review_reasons.includes('preliminary fit score below review threshold'));
+});
+test('fit threshold can be adjusted within safe range',()=>{
+  const result=assessManualBatch([job(1,{rating:42})],{evaluator:evaluated,minimumScore:40});
+  assert.equal(result.recommended.length,1);
+  assert.throws(()=>assessManualBatch([],{minimumScore:200}),RangeError);
+});
