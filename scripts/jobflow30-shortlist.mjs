@@ -24,12 +24,13 @@ export function evaluate(job) {
   const chicago = /\bchicago\b/i.test(location);
   const explicitOtherCity = /\b(new york|san francisco|los angeles|boston|seattle|austin|denver|atlanta|dallas)\b/i.test(location);
   const illinoisAllowed = /\b(illinois|\bil\b|united states|usa|nationwide|anywhere in the us)\b/i.test(location + ' ' + description);
-  const remoteOtherStateOnly = /\b(remote only in|residents of|must reside in|based in)\b/i.test(description) && !illinoisAllowed;
+  const residencyRestriction = description.match(/\b(?:remote only in|residents of|must reside in|based in|remote positions available in)\s+([^.;\n]{1,120})/i)?.[1] ?? '';
+  const remoteOtherStateOnly = Boolean(remote && residencyRestriction && !/\b(?:illinois|il)\b/i.test(residencyRestriction));
   const reasons = [];
   if (!title || !job.url || !job.company) reasons.push('missing job identity');
   if (BLOCKED.test(title)) reasons.push('senior leadership title');
   if (!remote && (!chicago || explicitOtherCity)) reasons.push('not Chicago on-site/hybrid');
-  if (remote && remoteOtherStateOnly) reasons.push('remote geography requires review');
+  if (remoteOtherStateOnly) reasons.push('remote residency restriction requires review');
   if (remote && !illinoisAllowed) reasons.push('Illinois remote eligibility unverified');
   if (/\b(us citizenship required|security clearance required)\b/i.test(description)) reasons.push('additional eligibility verification');
   const matched = TERMS.filter(([term]) => combined.includes(term));
