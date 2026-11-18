@@ -3,7 +3,7 @@
 // Usage: node scripts/jobflow15-research.mjs enriched.json research.json
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { isMainModule } from '../lib/is-main-module.mjs';
 const clean = value => String(value ?? '').replace(/\s+/g,' ').trim();
 const search = terms => 'https://www.google.com/search?q='+encodeURIComponent(terms);
 export function researchPlan(job) {
@@ -28,7 +28,7 @@ export function buildResearchQueue(data) {
   if (!Array.isArray(jobs)) throw new TypeError('Expected recommended or shortlisted array');
   return {generated_at:new Date().toISOString(), count:jobs.length, contacts:jobs.map(researchPlan)};
 }
-if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
+if (isMainModule(import.meta.url)) {
   const [,,input,output]=process.argv;
   if (!input || !output) {console.error('Usage: node scripts/jobflow15-research.mjs shortlist.json research.json');process.exit(2);}
   try {
