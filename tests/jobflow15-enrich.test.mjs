@@ -18,6 +18,17 @@ test('rejects non-http URLs without spawning',()=>{
 });
 test('retains shortlist shape',()=>{
  const result=enrichQueue({target:15,shortlisted:[job]},()=>({status:1,stdout:''}));
- assert.equal(result.shortlisted.length,1);
+ assert.equal(result.shortlisted.length,0);
+ assert.equal(result.needs_review.length,1);
+ assert.equal(result.needs_review[0].jd_status,'extraction_failed');
  assert.equal(result.target,15);
+});
+
+test('moves newly discovered residency restriction to review',()=>{
+ const input={target:15,shortlisted:[{...job,location:'Remote, United States'}],needs_review:[]};
+ const text='Applicants must reside in California. The role involves healthcare IT systems. '.repeat(5);
+ const result=enrichQueue(input,()=>({status:0,stdout:JSON.stringify({text})}));
+ assert.equal(result.shortlisted.length,0);
+ assert.equal(result.needs_review.length,1);
+ assert.ok(result.needs_review[0].reasons.includes('remote residency restriction requires review'));
 });
