@@ -37,18 +37,25 @@ export function evaluate(job, evidenceEntries) {
   const location = termsFor(job.location);
   const description = termsFor(job.description);
   const remote = /\bremote\b/i.test(location) || job.remote === true;
-  const chicago = /\bchicago\b/i.test(location);
+  // An address in Chicago Heights, Chicago Ridge, or a metro-area label is
+  // not proof the workplace is physically inside the City of Chicago.
+  const chicagoCity = /\bchicago\s*,\s*(?:IL|Illinois)\b/i.test(location) ||
+    /\bchicago\s*\(\s*(?:IL|Illinois)\s*\)/i.test(location);
+  const uncertainChicago = /\b(?:chicagoland|chicago\s+(?:heights|ridge|park|metro|metropolitan|suburbs?|area)|greater\s+chicago)\b/i.test(location);
+  const chicago = chicagoCity && !uncertainChicago;
   const usRemote = remote && (chicago || /\b(?:united states|usa|u\.s\.|nationwide|illinois|IL)\b/i.test(location));
   const restriction = residency(description);
   const remoteRestricted = Boolean(remote && restriction && !/\b(?:illinois|IL)\b/i.test(restriction));
+  const illinoisExcluded = remote && /\b(?:except|excluding|not available in|not hiring in|cannot work from|not eligible in)\s+(?:the state of\s+)?(?:illinois|IL)\b/i.test(location+' '+description);
   const role = ROLE_FAMILIES.find(family => family.pattern.test(title));
   const reasons = [];
   if (!title || !job.url || !job.company) reasons.push('missing job identity');
   if (SENIOR_TITLE.test(title)) reasons.push('senior leadership title');
-  if (!remote && !chicago) reasons.push('not Chicago on-site/hybrid');
-  if (!remote && /\bgreater chicago area|chicago metro\b/i.test(location)) reasons.push('Chicago city location requires verification');
+  if (!remote && uncertainChicago) reasons.push('Chicago city location requires verification');
+  else if (!remote && !chicago) reasons.push('not Chicago on-site/hybrid');
   if (remote && !usRemote) reasons.push('Illinois remote eligibility unverified');
   if (remoteRestricted) reasons.push('remote residency restriction requires review');
+  if (illinoisExcluded) reasons.push('Illinois explicitly excluded from remote location');
   if (/\b(?:active|current)\s+(?:RN|registered nurse)\s+(?:license|licensure)\s+(?:is\s+)?required\b/i.test(description)
     || /\b(?:Epic certification|PMP certification|security clearance)\s+(?:is\s+)?required\b/i.test(description)) {
     reasons.push('mandatory credential or clearance requires confirmation');
@@ -58,7 +65,7 @@ export function evaluate(job, evidenceEntries) {
   const evidence = matchEvidence(job, evidenceEntries);
   const experienceFit = Math.min(35, evidence.evidence_matches.reduce((sum, match) => sum + evidenceValue(match), 0));
   const roleFit = role?.score ?? 0;
-  const locationFit = (chicago || usRemote) && !remoteRestricted ? 15 : 0;
+  const locationFit = (chicago || usRemote) && !remoteRestricted && !illinoisExcluded ? 15 : 0;
   const score = Math.min(100, roleFit + locationFit + experienceFit);
   const status = reasons.length ? 'needs_review' : 'shortlisted';
 
