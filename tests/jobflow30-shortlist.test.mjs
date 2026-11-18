@@ -43,3 +43,18 @@ test('permits explicit Illinois residency restriction', () => {
   const result=evaluate(job({location:'Remote, United States',description:'Applicants must reside in Illinois.'}));
   assert.equal(result.status,'shortlisted');
 });
+
+test('explicit Chicago remote location is preliminarily eligible', () => {
+  const result = evaluate(job({ location:'Remote, Chicago, IL' }));
+  assert.equal(result.status,'shortlisted');
+});
+test('role, geography and experience contribute separately to score', () => {
+  const experience = [{id:'example',source:'synthetic',kind:'experience',label:'Synthetic healthcare IT work',terms:['epic']}];
+  const result = evaluate(job({description:'Position requires Epic support and workflow analysis'}), experience);
+  assert.equal(result.role_family,'Healthcare IT and Clinical Systems');
+  assert.equal(result.score_breakdown.role_alignment,45);
+  assert.equal(result.score_breakdown.location_alignment,15);
+  assert.equal(result.score_breakdown.evidence_alignment,12);
+  assert.equal(result.score,72);
+  assert.equal(result.evidence_matches[0].source,'synthetic');
+});
