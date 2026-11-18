@@ -32,13 +32,13 @@ function evidenceValue(match) {
   }
 }
 
-export function evaluate(job) {
+export function evaluate(job, evidenceEntries) {
   const title = termsFor(job.title);
   const location = termsFor(job.location);
   const description = termsFor(job.description);
   const remote = /\bremote\b/i.test(location) || job.remote === true;
   const chicago = /\bchicago\b/i.test(location);
-  const usRemote = remote && /\b(?:united states|usa|u\.s\.|nationwide|illinois|IL)\b/i.test(location);
+  const usRemote = remote && (chicago || /\b(?:united states|usa|u\.s\.|nationwide|illinois|IL)\b/i.test(location));
   const restriction = residency(description);
   const remoteRestricted = Boolean(remote && restriction && !/\b(?:illinois|IL)\b/i.test(restriction));
   const role = ROLE_FAMILIES.find(family => family.pattern.test(title));
@@ -55,7 +55,7 @@ export function evaluate(job) {
   }
   if (!role) reasons.push('job family match unverified');
 
-  const evidence = matchEvidence(job);
+  const evidence = matchEvidence(job, evidenceEntries);
   const experienceFit = Math.min(35, evidence.evidence_matches.reduce((sum, match) => sum + evidenceValue(match), 0));
   const roleFit = role?.score ?? 0;
   const locationFit = (chicago || usRemote) && !remoteRestricted ? 15 : 0;
