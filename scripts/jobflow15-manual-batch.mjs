@@ -7,7 +7,7 @@
  */
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { isMainModule } from '../lib/is-main-module.mjs';
 import { evaluate } from './jobflow30-shortlist.mjs';
 
 const normalized = value => String(value ?? '').trim();
@@ -82,7 +82,7 @@ export function assessManualBatch(postings, { evaluator = evaluate, limit = 15, 
   };
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
+if (isMainModule(import.meta.url)) {
   const [,,input,output] = process.argv;
   if (!input || !output) { console.error('Usage: node scripts/jobflow15-manual-batch.mjs jobs.json results.json');process.exit(2); }
   try {
