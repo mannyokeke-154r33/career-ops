@@ -48,7 +48,21 @@ export function evaluate(job, evidenceEntries) {
   const restriction = residency(description);
   const remoteRestricted = Boolean(remote && restriction && !/\b(?:illinois|IL)\b/i.test(restriction));
   const illinoisExcluded = remote && /\b(?:except|exclud(?:e|es|ed|ing)|not available in|not hiring in|cannot work from|not eligible in)\s+(?:the state of\s+)?(?:illinois|IL)\b/i.test(location+' '+description);
-  const role = ROLE_FAMILIES.find(family => family.pattern.test(title));
+  // A generic title cannot establish a job family on its own. Require
+  // multiple analytics duties and explicit healthcare context to infer one.
+  const genericAnalyst = /^(?:analyst(?:\s+(?:i|ii|1|2))?|junior analyst|associate analyst)$/i.test(title.trim());
+  const analyticsSignals = [
+    /\bdata (?:collection|quality|analysis|visualization|validation)\b/i,
+    /\bstatistical analysis\b/i,
+    /\bdashboards?\b/i,
+    /\b(?:reports?|reporting)\b/i,
+    /\b(?:key performance indicators|KPIs?)\b/i
+  ].filter(pattern => pattern.test(description)).length;
+  const healthcareContext = /\b(?:healthcare|health plan|health insurance|medical|clinical|pharmacy)\b/i.test(description);
+  const role = ROLE_FAMILIES.find(family => family.pattern.test(title)) ||
+    (genericAnalyst && healthcareContext && analyticsSignals >= 3
+      ? ROLE_FAMILIES.find(family => family.name === 'Healthcare Data and Business Analytics')
+      : null);
   const reasons = [];
   if (!title || !job.url || !job.company) reasons.push('missing job identity');
   if (SENIOR_TITLE.test(title)) reasons.push('senior leadership title');
