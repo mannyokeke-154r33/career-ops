@@ -113,3 +113,31 @@ test('remote jobs excluding Illinois are held for review', () => {
   assert.equal(result.status,'needs_review');
   assert.ok(result.reasons.includes('Illinois explicitly excluded from remote location'));
 });
+
+test('generic Analyst I maps to healthcare analytics only with multiple duties', () => {
+  const result = evaluate(job({
+    title:'Analyst I',
+    location:'Remote, United States',
+    description:'Healthcare data collection, routine data quality validation, statistical analysis, KPI dashboards, and reporting. '
+  }));
+  assert.equal(result.role_family,'Healthcare Data and Business Analytics');
+  assert.equal(result.status,'shortlisted');
+});
+test('generic Analyst I with unrelated duties does not infer healthcare analytics', () => {
+  const result = evaluate(job({
+    title:'Analyst I',
+    location:'Remote, United States',
+    description:'Financial trading and derivatives execution support for an investment desk.'
+  }));
+  assert.equal(result.role_family,null);
+  assert.equal(result.status,'needs_review');
+});
+test('generic Analyst I cannot infer healthcare analytics from a single vague term', () => {
+  const result = evaluate(job({
+    title:'Analyst I',
+    location:'Remote, United States',
+    description:'Healthcare team, prepare reports as requested.'
+  }));
+  assert.equal(result.role_family,null);
+  assert.equal(result.status,'needs_review');
+});
