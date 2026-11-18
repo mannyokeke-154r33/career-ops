@@ -1,65 +1,112 @@
 #!/usr/bin/env node
-// JobFlow 15 shortlist: conservative review queue from an existing JSON export.
-// Usage: node scripts/jobflow30-shortlist.mjs input.json [output.json]
+// JobFlow 15 conservative shortlist. The daily manual batch is the default workflow.
+// Legacy script path is retained for existing CLI integrations.
 import { readFileSync, writeFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
+import { resolve } from 'node:path';
 import { matchEvidence } from './jobflow30-evidence.mjs';
 import { readPipeline } from './jobflow15-pipeline.mjs';
 
-const TERMS = [
-  ['healthcare it', 35], ['clinical systems', 35], ['ehr', 30],
-  ['informatics', 30], ['software engineer', 32], ['software developer', 30],
-  ['data analyst', 28], ['business intelligence', 27], ['systems analyst', 30],
-  ['business analyst', 24], ['application support', 26], ['technical support', 20],
-  ['revenue cycle', 24], ['healthcare operations', 24], ['implementation specialist', 22],
-  ['customer success', 16], ['data engineer', 24], ['quality improvement', 20]
+// Job-family scores are triage priorities, NOT employment probabilities.
+const ROLE_FAMILIES = [
+  { name:'Healthcare IT and Clinical Systems', pattern:/\b(?:healthcare IT|clinical (?:systems|applications?|informatics)|EHR|EMR|Epic (?:analyst|support|application)|health(?:care)? informatics)\b/i, score:45 },
+  { name:'IT Applications and Support', pattern:/\b(?:application (?:support|analyst|specialist)|technical support|IT support|help ?desk|service desk|desktop support|IT operations|systems administrator)\b/i, score:42 },
+  { name:'Healthcare Data and Business Analytics', pattern:/\b(?:healthcare data|clinical data|data analyst|business intelligence|BI analyst|reporting analyst|revenue cycle|quality improvement)\b/i, score:43 },
+  { name:'Software and API Engineering', pattern:/\b(?:software (?:engineer|developer)|backend|front.?end|full.?stack|API (?:engineer|developer)|integration (?:engineer|developer))\b/i, score:41 },
+  { name:'Business and Systems Analysis', pattern:/\b(?:business (?:systems? )?analyst|systems analyst|implementation (?:analyst|specialist|consultant)|technical (?:customer success|implementation))\b/i, score:40 },
+  { name:'AI Evaluation and Operations', pattern:/\b(?:AI (?:evaluator|evaluation|quality|trainer)|LLM (?:evaluator|evaluation)|data annotat(?:ion|or)|prompt engineer)\b/i, score:38 },
+  { name:'Healthcare Operations and Administration', pattern:/\b(?:healthcare operations|healthcare administration|health services analyst|pharmacy operations|clinical operations)\b/i, score:38 }
 ];
-const BLOCKED = /\b(senior|sr\.?|staff|principal|director|vice president|vp|chief|head of)\b/i;
-const normalize = value => String(value ?? '').toLowerCase().trim();
+const SENIOR_TITLE = /\b(?:senior|sr\.?|staff|principal|director|vice president|vp|chief|head of)\b/i;
+const normalize = value => String(value ?? '').trim().toLowerCase();
+const termsFor = text => String(text ?? '');
+const residency = d => d.match(/\b(?:remote only in|residents of|must reside in|based in|remote positions available in)\s+([^.;\n]{1,120})/i)?.[1] ?? '';
+
+function evidenceValue(match) {
+  switch(match.kind) {
+    case 'experience': return 12;
+    case 'education': return 9;
+    case 'credential': return 8;
+    case 'training': return 4;
+    default: return 6;
+  }
+}
+
 export function evaluate(job) {
-  const title = normalize(job.title), location = normalize(job.location);
-  const description = normalize(job.description);
-  const combined = title + ' ' + description;
+  const title = termsFor(job.title);
+  const location = termsFor(job.location);
+  const description = termsFor(job.description);
   const remote = /\bremote\b/i.test(location) || job.remote === true;
   const chicago = /\bchicago\b/i.test(location);
-  const explicitOtherCity = /\b(new york|san francisco|los angeles|boston|seattle|austin|denver|atlanta|dallas)\b/i.test(location);
-  const illinoisAllowed = /\b(illinois|\bil\b|united states|usa|nationwide|anywhere in the us)\b/i.test(location + ' ' + description);
-  const residencyRestriction = description.match(/\b(?:remote only in|residents of|must reside in|based in|remote positions available in)\s+([^.;\n]{1,120})/i)?.[1] ?? '';
-  const remoteOtherStateOnly = Boolean(remote && residencyRestriction && !/\b(?:illinois|il)\b/i.test(residencyRestriction));
+  const usRemote = remote && /\b(?:united states|usa|u\.s\.|nationwide|illinois|IL)\b/i.test(location);
+  const restriction = residency(description);
+  const remoteRestricted = Boolean(remote && restriction && !/\b(?:illinois|IL)\b/i.test(restriction));
+  const role = ROLE_FAMILIES.find(family => family.pattern.test(title));
   const reasons = [];
   if (!title || !job.url || !job.company) reasons.push('missing job identity');
-  if (BLOCKED.test(title)) reasons.push('senior leadership title');
-  if (!remote && (!chicago || explicitOtherCity)) reasons.push('not Chicago on-site/hybrid');
-  if (remoteOtherStateOnly) reasons.push('remote residency restriction requires review');
-  if (remote && !illinoisAllowed) reasons.push('Illinois remote eligibility unverified');
-  if (/\b(us citizenship required|security clearance required)\b/i.test(description)) reasons.push('additional eligibility verification');
-  const matched = TERMS.filter(([term]) => combined.includes(term));
-  if (!matched.length) reasons.push('job family match unverified');
-  const score = Math.min(100, matched.reduce((n, [, weight]) => n + weight, 0) + (chicago ? 12 : 0) + (remote && illinoisAllowed ? 10 : 0));
-  const status = reasons.length ? 'needs_review' : 'shortlisted';
+  if (SENIOR_TITLE.test(title)) reasons.push('senior leadership title');
+  if (!remote && !chicago) reasons.push('not Chicago on-site/hybrid');
+  if (!remote && /\bgreater chicago area|chicago metro\b/i.test(location)) reasons.push('Chicago city location requires verification');
+  if (remote && !usRemote) reasons.push('Illinois remote eligibility unverified');
+  if (remoteRestricted) reasons.push('remote residency restriction requires review');
+  if (/\b(?:active|current)\s+(?:RN|registered nurse)\s+(?:license|licensure)\s+(?:is\s+)?required\b/i.test(description)
+    || /\b(?:Epic certification|PMP certification|security clearance)\s+(?:is\s+)?required\b/i.test(description)) {
+    reasons.push('mandatory credential or clearance requires confirmation');
+  }
+  if (!role) reasons.push('job family match unverified');
+
   const evidence = matchEvidence(job);
-  const evidenceScore = Math.min(25, evidence.evidence_coverage_count * 3);
-  return { ...job, score: Math.min(100, Math.round(score * 0.75 + evidenceScore)), status, reasons, outreach: { recruiter_lookup: 'not_started', recruiter_profile_url: null, recruiter_role_confirmed: false, interaction_opportunity: null, application_confirmed: false, message_status: 'not_drafted', message_sent_at: null, reply_status: 'none', follow_up_due: null }, ...evidence };
+  const experienceFit = Math.min(35, evidence.evidence_matches.reduce((sum, match) => sum + evidenceValue(match), 0));
+  const roleFit = role?.score ?? 0;
+  const locationFit = (chicago || usRemote) && !remoteRestricted ? 15 : 0;
+  const score = Math.min(100, roleFit + locationFit + experienceFit);
+  const status = reasons.length ? 'needs_review' : 'shortlisted';
+
+  return {
+    ...job, score, status, reasons,
+    role_family:role?.name ?? null,
+    score_breakdown:{role_alignment:roleFit, location_alignment:locationFit, evidence_alignment:experienceFit},
+    outreach:{
+      recruiter_lookup:'not_started',
+      recruiter_profile_url:null,
+      recruiter_role_confirmed:false,
+      interaction_opportunity:null,
+      application_confirmed:false,
+      message_status:'not_drafted',
+      message_sent_at:null, reply_status:'none', follow_up_due:null
+    },
+    ...evidence
+  };
 }
+
 export function shortlist(jobs, limit = 15) {
   if (!Array.isArray(jobs)) throw new TypeError('Expected JSON array of jobs');
+  if (!Number.isInteger(limit) || limit < 1 || limit > 15) throw new RangeError('Limit must be 1 through 15');
   const seen = new Set();
   const evaluated = jobs.map(evaluate).filter(job => {
     const key = [normalize(job.company), normalize(job.requisition_id || job.id || job.url)].join('|');
     if (seen.has(key)) return false;
     seen.add(key);
     return true;
-  }).sort((a, b) => (a.status === 'shortlisted' ? 0 : 1) - (b.status === 'shortlisted' ? 0 : 1) || b.score - a.score);
-  return { generated_at: new Date().toISOString(), target: limit, shortlisted: evaluated.filter(j => j.status === 'shortlisted').slice(0, limit), needs_review: evaluated.filter(j => j.status === 'needs_review'), note: 'Shortlist only. Target up to 15 confirmed applications daily. Verify the job and eligibility, research relevant LinkedIn contacts, and send individualized outreach only after user review and confirmed application. No application or message was sent.' };
+  }).sort((a,b) => (a.status === 'shortlisted' ? 0 : 1)-(b.status === 'shortlisted' ? 0 : 1) || b.score-a.score);
+  return {
+    generated_at:new Date().toISOString(),
+    target:limit,
+    shortlisted:evaluated.filter(job=>job.status==='shortlisted').slice(0,limit),
+    needs_review:evaluated.filter(job=>job.status==='needs_review'),
+    note:'Preliminary job matching only. Human review is required; no applications or LinkedIn actions were performed.'
+  };
 }
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  const [, , input, output] = process.argv;
-  if (!input) { console.error('Usage: node scripts/jobflow30-shortlist.mjs jobs.json [queue.json] | --pipeline data/pipeline.md [queue.json]'); process.exit(2); }
+
+if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
+  const [,,input,output] = process.argv;
+  if (!input) {console.error('Usage: node scripts/jobflow30-shortlist.mjs jobs.json [queue.json] | --pipeline data/pipeline.md [queue.json]');process.exit(2);}
   const pipelineMode = input === '--pipeline';
   const source = pipelineMode ? output : input;
   const destination = pipelineMode ? process.argv[4] : output;
-  if (!source) { console.error('Missing pipeline path'); process.exit(2); }
-  const data = shortlist(pipelineMode ? readPipeline(source) : JSON.parse(readFileSync(source, 'utf8')));
-  const result = JSON.stringify(data, null, 2) + '\n';
-  if (destination) writeFileSync(destination, result); else process.stdout.write(result);
+  if (!source) {console.error('Missing pipeline path');process.exit(2);}
+  const data = shortlist(pipelineMode ? readPipeline(source) : JSON.parse(readFileSync(source,'utf8')));
+  const result = JSON.stringify(data,null,2)+'\n';
+  if (destination) writeFileSync(destination,result,{mode:0o600});
+  else process.stdout.write(result);
 }
