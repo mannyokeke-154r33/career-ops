@@ -4,7 +4,8 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { evaluate } from './jobflow30-shortlist.mjs';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
+import { isMainModule } from '../lib/is-main-module.mjs';
 import { dirname, resolve, join } from 'node:path';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -38,7 +39,7 @@ export function enrichQueue(queue, run = spawnSync) {
     note:'Read-only job description extraction. Failed or restricted postings move to needs_review; verify requirements and availability manually. No application or LinkedIn action performed.'
   };
 }
-if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
+if (isMainModule(import.meta.url)) {
   const [,,input,output] = process.argv;
   if (!input || !output) { console.error('Usage: node scripts/jobflow15-enrich.mjs shortlist.json enriched.json'); process.exit(2); }
   try {
