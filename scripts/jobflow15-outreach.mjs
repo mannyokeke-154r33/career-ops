@@ -35,6 +35,10 @@ export function save(path, data) {
   renameSync(temp,path);
 }
 if (isMainModule(import.meta.url)) {
+  if (process.argv.includes('--help') || process.argv.includes('-h')) {
+    console.log("Usage: node scripts/jobflow15-outreach.mjs list | set <job-id> <field> <value>");
+    process.exit(0);
+  }
   const [,,cmd,id,field,...rest] = process.argv;
   const path = resolve(process.env.CAREER_OPS_OUTREACH_PATH || 'data/jobflow15-outreach.json');
   try {
