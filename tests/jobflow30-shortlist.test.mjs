@@ -97,3 +97,19 @@ test('remote location excludes Illinois with excluding wording', () => {
   assert.equal(result.status,'needs_review');
   assert.ok(result.reasons.includes('Illinois explicitly excluded from remote location'));
 });
+
+test('Chicago Heights is not treated as Chicago city', () => {
+  const result=evaluate(job({location:'Chicago Heights, IL'}));
+  assert.equal(result.status,'needs_review');
+  assert.ok(result.reasons.includes('not Chicago on-site/hybrid'));
+});
+test('Greater Chicago Area is not assumed within city limits', () => {
+  const result=evaluate(job({location:'Greater Chicago Area'}));
+  assert.equal(result.status,'needs_review');
+  assert.ok(result.reasons.includes('Chicago city location requires verification'));
+});
+test('remote jobs excluding Illinois are held for review', () => {
+  const result=evaluate(job({location:'Remote, United States',description:'This position is not available in Illinois.'}));
+  assert.equal(result.status,'needs_review');
+  assert.ok(result.reasons.includes('Illinois explicitly excluded from remote location'));
+});
