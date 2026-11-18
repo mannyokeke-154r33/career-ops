@@ -65,3 +65,16 @@ test('fit threshold can be adjusted within safe range',()=>{
   assert.equal(result.recommended.length,1);
   assert.throws(()=>assessManualBatch([],{minimumScore:200}),RangeError);
 });
+
+test('separates clear geography blockers from uncertain eligibility',()=>{
+  const evaluator=x=>({...evaluated(x), status:'needs_review',reasons:['not Chicago on-site/hybrid']});
+  const result=assessManualBatch([job(1)],{evaluator});
+  assert.equal(result.do_not_prioritize.length,1);
+  assert.equal(result.needs_review.length,0);
+  assert.equal(result.recommended.length,0);
+});
+test('does not collapse different malformed rows when identifiers are missing',()=>{
+  const result=assessManualBatch([{company:'Example',title:'A',description:'text'}, {company:'Example',title:'B',description:'text'}], {evaluator:evaluated});
+  assert.equal(result.unique_count,2);
+  assert.equal(result.needs_review.length,2);
+});
