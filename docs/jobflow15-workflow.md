@@ -37,7 +37,7 @@ node scripts/jobflow15-research.mjs data/jobflow15-daily.json data/jobflow15-res
 node scripts/jobflow15-outreach.mjs list
 ```
 
-The recruiter research script expects a `shortlisted` array rather than the manual batch's `recommended` array. Therefore, until the formats are unified, use the research script with the legacy shortlist output rather than invoking the second command on the manual batch output. This compatibility issue is tracked for resolution before launch.
+The recruiter research script accepts both manual `recommended` lists and legacy `shortlisted` lists. It generates search leads only and does not access LinkedIn profiles.
 
 The optional existing scanner path is:
 
