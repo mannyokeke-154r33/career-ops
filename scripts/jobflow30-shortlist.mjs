@@ -41,8 +41,9 @@ export function evaluate(job, evidenceEntries) {
   // not proof the workplace is physically inside the City of Chicago.
   const chicagoCity = /\bchicago\s*,\s*(?:IL|Illinois)\b/i.test(location) ||
     /\bchicago\s*\(\s*(?:IL|Illinois)\s*\)/i.test(location);
-  const uncertainChicago = /\b(?:chicagoland|chicago\s+(?:heights|ridge|park|metro|metropolitan|suburbs?|area)|greater\s+chicago)\b/i.test(location);
-  const chicago = chicagoCity && !uncertainChicago;
+  const outsideChicago = /\bchicago\s+(?:heights|ridge|park)\b/i.test(location);
+  const uncertainChicago = /\b(?:chicagoland|chicago\s+(?:metro|metropolitan|suburbs?|area)|greater\s+chicago)\b/i.test(location);
+  const chicago = chicagoCity && !uncertainChicago && !outsideChicago;
   const usRemote = remote && (chicago || /\b(?:united states|usa|u\.s\.|nationwide|illinois|IL)\b/i.test(location));
   const restriction = residency(description);
   const remoteRestricted = Boolean(remote && restriction && !/\b(?:illinois|IL)\b/i.test(restriction));
@@ -90,7 +91,9 @@ export function shortlist(jobs, limit = 15) {
   if (!Array.isArray(jobs)) throw new TypeError('Expected JSON array of jobs');
   if (!Number.isInteger(limit) || limit < 1 || limit > 15) throw new RangeError('Limit must be 1 through 15');
   const seen = new Set();
-  const evaluated = jobs.map(evaluate).filter(job => {
+  // Array.map passes an index as its second argument, which evaluate() uses
+  // for optional candidate evidence. Pass only the job to avoid that mismatch.
+  const evaluated = jobs.map(job => evaluate(job)).filter(job => {
     const key = [normalize(job.company), normalize(job.requisition_id || job.id || job.url)].join('|');
     if (seen.has(key)) return false;
     seen.add(key);
